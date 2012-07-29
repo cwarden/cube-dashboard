@@ -27,7 +27,7 @@ if (argv.help) {
 var static = require('node-static');
 var path = require('path');
 var fs = require('fs');
-var http = require('http');
+var https = require('https');
 var url = require('url');
 
 var publicPath = path.join(__dirname, '../public');
@@ -42,7 +42,7 @@ var startServer = function(err, configStr) {
     config.host = argv.host;
     configStr = JSON.stringify(config);
   }
-  require('http').createServer(function (request, response) {
+  require('https').createServer(function (request, response) {
     if (request.url == '/config.json') {
       response.setHeader('Content-Type', 'application/json');
       response.end(configStr);
@@ -59,22 +59,24 @@ var startServer = function(err, configStr) {
 
 
 var readLocalOrRemoteFile = function(filename, callback){
-  console.log("configFile: " + configFile);
   try{
     fs.lstatSync(filename);
     fs.readFile(filename, 'utf8', callback);
   }catch(e){
-    http.get(options, function(res) {
-      console.log("Got response: " + res.statusCode);
-      
-      res.on("data", function(chunk) {
-        console.log("BODY: " + chunk);
-        callback();
+    try{
+      console.log("File " + filename + " not found locally, trying remote.");
+      https.get(url.parse(filename), function(res) {
+        console.log("Got response: " + res.statusCode);
+        res.on("data", function(chunk) {
+          callback(null, chunk);
+        });
+      }).on('error', function(e) {
+        throw(e);
       });
-    }).on('error', function(e) {
-      throw(e);
-    });
+    }catch(e){
+      console.log("Unable to find file " + filename);
+    }
   }
 };
 
-readLocalOrRemoteFile(url.parse(configFile), startServer);
+readLocalOrRemoteFile(configFile, startServer);
