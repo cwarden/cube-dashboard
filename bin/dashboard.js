@@ -58,18 +58,23 @@ var startServer = function(err, configStr) {
 };
 
 
-var readRemoteFile = function(options, callback){
-  http.get(options, function(res) {
-    console.log("Got response: " + res.statusCode);
-
-    res.on("data", function(chunk) {
-      console.log("BODY: " + chunk);
+var readLocalOrRemoteFile = function(filename, callback){
+  console.log("configFile: " + configFile);
+  try{
+    fs.lstatSync(filename);
+    fs.readFile(filename, 'utf8', callback);
+  }catch(e){
+    http.get(options, function(res) {
+      console.log("Got response: " + res.statusCode);
+      
+      res.on("data", function(chunk) {
+        console.log("BODY: " + chunk);
+        callback();
+      });
+    }).on('error', function(e) {
+      throw(e);
     });
-  }).on('error', function(e) {
-    console.log("Got error: " + e.message);
-  });
-  callback();
+  }
 };
 
-//fs.readFile(configFile, 'utf8', startServer);
-readRemoteFile(url.parse(configFile), startServer);
+readLocalOrRemoteFile(url.parse(configFile), startServer);
