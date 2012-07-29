@@ -27,6 +27,8 @@ if (argv.help) {
 var static = require('node-static');
 var path = require('path');
 var fs = require('fs');
+var http = require('http');
+var url = require('url');
 
 var publicPath = path.join(__dirname, '../public');
 var file = new(static.Server)(publicPath);
@@ -55,4 +57,19 @@ var startServer = function(err, configStr) {
   console.log('Server started on port ' + argv.port);
 };
 
-fs.readFile(configFile, 'utf8', startServer);
+
+var readRemoteFile = function(options, callback){
+  http.get(options, function(res) {
+    console.log("Got response: " + res.statusCode);
+
+    res.on("data", function(chunk) {
+      console.log("BODY: " + chunk);
+    });
+  }).on('error', function(e) {
+    console.log("Got error: " + e.message);
+  });
+  callback();
+};
+
+//fs.readFile(configFile, 'utf8', startServer);
+readRemoteFile(url.parse(configFile), startServer);
