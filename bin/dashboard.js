@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 var opt = require('optimist')
-  .usage('Start dashboard server\n$0 [config.json]\n\nconfig.json can be passed in as local or remote file.\n\nConfig file can also be set by environment variable CUBE_REMOTE_FILE.')
+  .usage('Start dashboard server\n$0 [config.json]\n\nconfig.json can be passed in as local or remote file.\n\nConfig file can also be set by environment variable $CUBE_REMOTE_FILE.')
   .options('h', {
     desc: 'Show help info',
     alias: 'help',
     type: 'boolean'
   })
   .options('p', {
-    desc: 'Port to run server',
+    desc: 'Port to run server, can also be supplied as environment variable $DASHBOARD_PORT',
     alias: 'port',
     default: 8000
   })
@@ -42,6 +42,12 @@ if(typeof(configFile) == 'undefined'){
   }
 }
 
+var serverPort = argv.port
+
+if(typeof(process.env.DASHBOARD_PORT) != 'undefined'){
+  serverPort=process.env.DASHBOARD_PORT
+}
+
 var startServer = function(err, configStr) {
   if (err) throw err;
   var config = JSON.parse(configStr);
@@ -60,8 +66,8 @@ var startServer = function(err, configStr) {
         file.serve(request, response);
       });
     }
-  }).listen(argv.port);
-  console.log('Server started on port ' + argv.port);
+  }).listen(serverPort);
+  console.log('Server started on port ' + serverPort);
 };
 
 
