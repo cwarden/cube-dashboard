@@ -1,1 +1,1 @@
-web: node bin/dashboard.js
+web: node bin/dashboard.js -p $PORT
