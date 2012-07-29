@@ -34,7 +34,7 @@ var file = new(static.Server)(publicPath);
 
 var configFile = argv._[0];
 if(typeof(configFile) == 'undefined'){
-  if(typeof(process.env.CUdBE_REMOTE_FILE) != 'undefined'){
+  if(typeof(process.env.CUBE_REMOTE_FILE) != 'undefined'){
     configFile=process.env.CUBE_REMOTE_FILE
   }else{
     opt.showHelp();    
