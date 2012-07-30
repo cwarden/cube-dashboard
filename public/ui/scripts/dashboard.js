@@ -3,12 +3,15 @@ var Dashboard = function(elementSelector, host, options) {
   this.host = host;
   this.options = aug(true, {}, Dashboard.defaults, options);
   if (!(typeof(this.options.klass) === "undefined")){
+    // Currently a hack.
+    // This needs to instantiate the class based off the string.
     console.log("klass: " + this.options.klass);
+    this.customSetup();
   }else{
     this.setup();
-  }
-  if (options.metrics) {
-    this.setMetrics(options.metrics);
+    if (options.metrics) {
+      this.setMetrics(options.metrics);
+    }
   }
 };
 
