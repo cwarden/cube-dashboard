@@ -26,6 +26,7 @@ if (argv.help) {
 var static = require('node-static');
 var path = require('path');
 var fs = require('fs');
+var http = require('http');
 var https = require('https');
 var url = require('url');
 
@@ -55,7 +56,7 @@ var startServer = function(err, configStr) {
     config.host = argv.host;
     configStr = JSON.stringify(config);
   }
-  require('https').createServer(function (request, response) {
+  require('http').createServer(function (request, response) {
     if (request.url == '/config.json') {
       response.setHeader('Content-Type', 'application/json');
       response.end(configStr);
