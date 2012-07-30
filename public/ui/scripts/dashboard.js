@@ -2,7 +2,11 @@ var Dashboard = function(elementSelector, host, options) {
   this.selector = elementSelector;
   this.host = host;
   this.options = aug(true, {}, Dashboard.defaults, options);
-  this.setup();
+  if (!(typeof(this.options.klass) === "undefined")){
+    console.log("klass: " + this.options.klass);
+  }else{
+    this.setup();
+  }
   if (options.metrics) {
     this.setMetrics(options.metrics);
   }
