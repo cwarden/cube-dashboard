@@ -2,3 +2,4 @@ node_modules
 .rvmrc
 *~
 remote_config.json
+config.json
