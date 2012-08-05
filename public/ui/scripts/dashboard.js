@@ -3,9 +3,20 @@ var Dashboard = function(elementSelector, host, options) {
   this.host = host;
   this.options = aug(true, {}, Dashboard.defaults, options);
   if (!(typeof(this.options.klass) === "undefined")){
+
+    var step = +cubism.option("step", 1e4);
+    var context = cubism.context()
+      .step(step)
+      .size(window.innerWidth - 4);
+
+    this.cube = context.cube(this.host);
+    console.log("klass: " + this.options.klass);
+    console.log("cube: " + this.cube);
+    j = this.cube.metric("sum(api_w_content)")
+    console.log(j);
+    console.log(j.valueAt);
     // Currently a hack.
     // This needs to instantiate the class based off the string.
-    console.log("klass: " + this.options.klass);
     this.customSetup();
   }else{
     this.setup();
@@ -62,6 +73,37 @@ Dashboard.prototype.setup = function() {
     window.location = "?step=" + this.value + "&" + location.search.replace(/[?&]step=[^&]*(&|$)/g, "$1").substring(1);
   });
 };
+
+Dashboard.prototype.fetchValues = function() {
+  var self = this;
+
+  var getArray = function(index, expression, start, stop) {
+    var format = d3.time.format.iso;
+    var url = self.host+'/1.0/metric?expression='+expression+'&start='+format(start)+'&stop='+format(stop)+'&step=3600000&cachebuster='+ (+new Date());
+    
+    d3.json(url, function(response) {
+      var val = 0;
+      for (var i = 0, c = response.length; i < c; i++) {
+        var res = response[i];
+        val += res.value;
+      }
+      var el = d3.selectAll('.horizon .title .totals')[0][index];
+      el.innerHTML = val;
+    });
+  };
+
+  var start = d3.time.day.floor(new Date());
+  var stop = d3.time.day.offset(start, 1);
+
+  for (var i = 0, c = self.metrics.length; i < c; i++) {
+    var metric = self.metrics[i];
+    var expression = metric.expression.toString();
+    getValues(i, expression, start, stop);
+  }
+
+  setTimeout(function() { self.fetchValues (); }, 60*1000);
+};
+
 
 Dashboard.prototype.fetchTotals = function() {
   var self = this;
