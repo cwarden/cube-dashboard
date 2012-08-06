@@ -2,19 +2,20 @@ var Dashboard = function(elementSelector, host, options) {
   this.selector = elementSelector;
   this.host = host;
   this.options = aug(true, {}, Dashboard.defaults, options);
+  console.log(this.options);
   if (!(typeof(this.options.klass) === "undefined")){
 
-    var step = +cubism.option("step", 1e4);
-    var context = cubism.context()
-      .step(step)
-      .size(window.innerWidth - 4);
+    // var step = +cubism.option("step", 1e4);
+    // var context = cubism.context()
+    //   .step(step)
+    //   .size(window.innerWidth - 4);
 
-    this.cube = context.cube(this.host);
-    console.log("klass: " + this.options.klass);
-    console.log("cube: " + this.cube);
-    j = this.cube.metric("sum(api_w_content)")
-    console.log(j);
-    console.log(j.valueAt);
+    // this.cube = context.cube(this.host);
+    // console.log("klass: " + this.options.klass);
+    // console.log("cube: " + this.cube);
+    // j = this.cube.metric("sum(api_w_content)")
+    // console.log(j);
+    // console.log(j.valueAt);
     // Currently a hack.
     // This needs to instantiate the class based off the string.
     this.customSetup();
