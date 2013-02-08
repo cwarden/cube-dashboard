@@ -15,7 +15,7 @@ Dashboard.defaults = {
 };
 
 Dashboard.prototype.setup = function() {
-  var step = +cubism.option("step", 1e4);
+  var step = +cubism.option("step", 3e5);
   var context = cubism.context()
       .step(step)
       .size(window.innerWidth - 4);
