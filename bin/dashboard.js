@@ -23,32 +23,110 @@ if (argv.help) {
   opt.showHelp();
 }
 
-var static = require('node-static');
-var path = require('path');
 var fs = require('fs');
+var express = require('express');
+var crypto = require('crypto');
 
-var publicPath = path.join(__dirname, '../public');
-var file = new(static.Server)(publicPath);
+var checkSignature = function(signature, key, payload) {
+  var signer = crypto.createHmac('sha256', key);
+  var hmac = signer.update(payload).digest('base64');
+  return signature == hmac;
+}
+
+var getSignedRequest = function(request) {
+  var signedRequest = request.body.signed_request;
+  if (! signedRequest) {
+    signedRequest = request.cookies.signed_request;
+  }
+  return signedRequest;
+};
+
+var parseSignedRequest = function(signedRequest) {
+    if (!signedRequest) {
+      throw "No signed request found";
+    }
+    var array = signedRequest.split('.');
+    if (array.length != 2) {
+      throw "Incorrectly formatted signed request";
+    }
+    var sr = {
+      signature: array[0],
+      payload: array[1]
+    };
+    return sr;
+}
+
+var checkSignedRequest = function(request, response, next) {
+  try {
+    var signedRequest = getSignedRequest(request);
+
+    var consumerSecret = process.env.CANVAS_CONSUMER_SECRET;
+
+    var sr = parseSignedRequest(signedRequest);
+    var signature = sr.signature;
+    var payload = sr.payload;
+
+    if (!checkSignature(signature, consumerSecret, payload)) {
+      throw "Invalid Signature";
+    }
+
+    response.cookie('signed_request', signedRequest);
+    next();
+  } catch(e) {
+    response.locals.layout = false;
+    response.render('unauthorized', { error: e });
+  }
+}
+
+var html = function(request, response, file) {
+  try {
+    var signedRequest = getSignedRequest(request);
+    var sr = parseSignedRequest(signedRequest);
+    var payload = sr.payload;
+    var jsonString = (new Buffer(payload, 'base64')).toString();
+    response.locals.layout = false;
+    response.render(file, {
+      signed_request: signedRequest,
+      json_string: jsonString
+    });
+  } catch (e) {
+    response.send(500, { error: 'unexpected error' });
+  }
+};
 
 var startServer = function(err, configStr) {
   if (err) throw err;
   var config = JSON.parse(configStr);
   if (argv.host) {
     config.host = argv.host;
-    configStr = JSON.stringify(config);
   }
-  require('http').createServer(function (request, response) {
-    if (request.url == '/config.json') {
-      response.setHeader('Content-Type', 'application/json');
-      response.end(configStr);
-    } else if (config.icon && request.url == '/ui/images/icon.png') {
+  var app = express();
+
+  app.set('views', __dirname + '/../public');
+  app.set('view cache', false);
+  app.set('view engine', 'html')
+  app.engine('html', require('uinexpress').__express)
+
+  app.use(express.bodyParser());
+  app.use(express.cookieParser());
+
+  app.all('*', checkSignedRequest);
+
+  app.get('/config.json', function(request, response) {
+     response.json(config);
+  });
+  if (config.json) {
+    app.get('/ui/images/icon.png', function(request, response) {
       fs.createReadStream(config.icon).pipe(response);
-    } else {
-      request.addListener('end', function () {
-        file.serve(request, response);
-      });
-    }
-  }).listen(argv.port);
+    });
+  }
+  app.all('/', function(request, response) { html(request, response, 'index') });
+  app.all('/index.html', function(request, response) { html(request, response, 'index') });
+  app.all('/events.html', function(request, response) { html(request, response, 'events') });
+
+  app.use(express.static(__dirname + '/../public'));
+  app.listen(argv.port);
+
   console.log('Server started on port ' + argv.port);
 };
 
