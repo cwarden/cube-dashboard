@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "optimist": "0.3.4",
-    "express": "3.1.*",
+    "express": "3.1.0",
     "uinexpress": "0.0.5"
   },
   "devDependencies": {
