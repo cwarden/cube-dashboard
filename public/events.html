@@ -8,6 +8,10 @@
 		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no" />  	
 		<link rel="stylesheet" href="/ui/stylesheets/common.css"/>
 		<link rel="stylesheet" href="/ui/stylesheets/events.css"/>
+		<script>
+			var signedRequest = '<%= signed_request %>';
+			var jsonString = '<%= json_string %>';
+		</script>
 	</head>
 	<body>
 		<header>
@@ -21,7 +25,7 @@
     <section id="content">
       <table id="events"></table>
     </section>
-		<script src="/ui/vendor/d3.v2.min.js"></script>
+		<script src="/ui/vendor/d3.v3.js"></script>
 		<script src="/ui/vendor/cubism.v1.min.js"></script>
 		<script src="/ui/vendor/aug.min.js"></script>
 		<script src="/ui/vendor/date.extensions.js"></script>
@@ -29,6 +33,9 @@
 		<script src="/ui/scripts/eventlist.js"></script>
 		<script src="/ui/scripts/events.js"></script>
 		<script>
+			if (signedRequest) {
+				Events.defaults.credentials = 'SIGNED_REQUEST ' + signedRequest;
+			}
 			d3.json('/config.json', function(config) {
           new SectionSelect('#sections');
           var eventList = new EventList('#event-list', config.events, {
