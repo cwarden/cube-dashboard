@@ -70,7 +70,7 @@ var checkSignedRequest = function(request, response, next) {
       throw "Invalid Signature";
     }
 
-    response.cookie('signed_request', signedRequest);
+    response.cookie('signed_request', signedRequest, { secure: true } );
     next();
   } catch(e) {
     response.locals.layout = false;
