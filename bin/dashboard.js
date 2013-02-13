@@ -56,11 +56,18 @@ var parseSignedRequest = function(signedRequest) {
     return sr;
 }
 
+var deserializePayload = function(payload) {
+  var jsonString = (new Buffer(payload, 'base64')).toString();
+  var object = JSON.parse(jsonString);
+  return object;
+};
+
 var checkSignedRequest = function(request, response, next) {
   try {
     var signedRequest = getSignedRequest(request);
 
     var consumerSecret = process.env.CANVAS_CONSUMER_SECRET;
+    var validEmailDomain = process.env.VALID_EMAIL_DOMAIN;
 
     var sr = parseSignedRequest(signedRequest);
     var signature = sr.signature;
@@ -68,6 +75,14 @@ var checkSignedRequest = function(request, response, next) {
 
     if (!checkSignature(signature, consumerSecret, payload)) {
       throw "Invalid Signature";
+    }
+
+    if (validEmailDomain) {
+      var emailRegex = new RegExp('@' + validEmailDomain + '$');
+      payload = deserializePayload(payload);
+      if (! emailRegex.test(payload.context.user.email)) {
+        throw "Invalid User";
+      }
     }
 
     response.cookie('signed_request', signedRequest, { secure: true } );
