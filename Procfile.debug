@@ -1,0 +1,1 @@
+debug: supervisor -- bin/dashboard.js -p $PORT config.json
