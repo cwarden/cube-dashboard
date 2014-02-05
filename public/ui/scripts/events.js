@@ -1,11 +1,14 @@
-var Events = function(el, host, name, dataPoints) {
+var Events = function(el, host, name, dataPoints, options) {
   this.el = d3.select(el);
   this.host = host;
   this.name = name;
   this.dataPoints = dataPoints;
+  this.options = aug(true, {}, Events.defaults, options);
 
   this.render();
 };
+
+Events.defaults = {};
 
 Events.prototype.render = function() {
   var self = this;
@@ -43,7 +46,14 @@ Events.prototype.render = function() {
 
 
   };
-  d3.json(url, function(json) {
+  var xhr = d3.json(url);
+  if (self.options.credentials) {
+    xhr.header('Authorization', self.options.credentials);
+  }
+  xhr.get(function(error, json) {
+    if (error) {
+      throw new Error("unable to load data");
+    }
     self.el
       .text('');
     writeHeader();

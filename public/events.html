@@ -2,26 +2,30 @@
 <html>
 	<head>
 		<title>Events</title>
-		<meta name="apple-mobile-web-app-capable" content="yes" /> 
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<link rel="apple-touch-icon-precomposed" href="/ui/images/icon.png"/>
-		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no" />  	
+		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no" />
 		<link rel="stylesheet" href="/ui/stylesheets/common.css"/>
 		<link rel="stylesheet" href="/ui/stylesheets/events.css"/>
+		<script>
+			var signedRequest = '<%= signed_request %>';
+			var jsonString = '<%= json_string %>';
+		</script>
 	</head>
 	<body>
 		<header>
-      <select id="sections">
-        <option value="index">Dashboards</option>
-        <option value="events" selected>Events</option>
-      </select>
-      <select id="event-list">
-      </select>
+		<select id="sections">
+			<option value="index">Dashboards</option>
+			<option value="events" selected>Events</option>
+		</select>
+		<select id="event-list">
+		</select>
 		</header>
-    <section id="content">
-      <table id="events"></table>
-    </section>
-		<script src="/ui/vendor/d3.v2.min.js"></script>
+		<section id="content">
+		<table id="events"></table>
+		</section>
+		<script src="/ui/vendor/d3.v3.js"></script>
 		<script src="/ui/vendor/cubism.v1.min.js"></script>
 		<script src="/ui/vendor/aug.min.js"></script>
 		<script src="/ui/vendor/date.extensions.js"></script>
@@ -29,13 +33,16 @@
 		<script src="/ui/scripts/eventlist.js"></script>
 		<script src="/ui/scripts/events.js"></script>
 		<script>
+			if (signedRequest) {
+				Events.defaults.credentials = 'SIGNED_REQUEST ' + signedRequest;
+			}
 			d3.json('/config.json', function(config) {
-          new SectionSelect('#sections');
-          var eventList = new EventList('#event-list', config.events, {
-            selected: function(name, dataPoints) {
-              new Events('#events', config.host, name, dataPoints);
-            }
-          });
+				new SectionSelect('#sections');
+				var eventList = new EventList('#event-list', config.events, {
+					selected: function(name, dataPoints) {
+						new Events('#events', config.host, name, dataPoints);
+					}
+				});
 			});
 		</script>
 

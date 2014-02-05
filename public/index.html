@@ -8,6 +8,10 @@
 		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no" />  	
 		<link rel="stylesheet" href="/ui/stylesheets/common.css"/>
 		<link rel="stylesheet" href="/ui/stylesheets/dashboard.css"/>
+		<script>
+			var signedRequest = '<%= signed_request %>';
+			var jsonString = '<%= json_string %>';
+		</script>
 	</head>
 	<body>
 		<header>
@@ -25,13 +29,16 @@
 			</select>
 		</header>
 		<div id="dashboard"></div>
-		<script src="/ui/vendor/d3.v2.min.js"></script>
+		<script src="/ui/vendor/d3.v3.min.js"></script>
 		<script src="/ui/vendor/cubism.v1.min.js"></script>
 		<script src="/ui/vendor/aug.min.js"></script>
 		<script src="/ui/scripts/section-select.js"></script>
 		<script src="/ui/scripts/dashboards.js"></script>
 		<script src="/ui/scripts/dashboard.js"></script>
 		<script>
+			if (signedRequest) {
+				Dashboard.defaults.credentials = 'SIGNED_REQUEST ' + signedRequest;
+			}
 			d3.json('/config.json', function(config) {
         new SectionSelect('#sections');
         window.dashboards = new DashboardSelect('#dashboards', config.dashboards);

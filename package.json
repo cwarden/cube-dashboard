@@ -9,13 +9,15 @@
     "url": "https://github.com/jgallen23/cube-dashboard.git"
   },
   "dependencies": {
-    "node-static": "0.6.0",
-    "optimist": "0.3.4"
+    "optimist": "0.3.4",
+    "express": "3.1.0",
+    "uinexpress": "0.0.5"
   },
   "devDependencies": {
   },
   "engines": {
-    "node": "*"
+    "node": "0.6.x",
+    "npm": "1.1.x"
   },
   "bin": { "cube-dashboard": "./bin/dashboard.js" },
   "keywords": ["cube", "dashboard", "report"]

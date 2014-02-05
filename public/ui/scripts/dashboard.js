@@ -2,7 +2,7 @@ var Dashboard = function(elementSelector, host, options) {
   this.selector = elementSelector;
   this.host = host;
   this.options = aug(true, {}, Dashboard.defaults, options);
-  this.setup();
+  this.setup(this.options.credentials);
   if (options.metrics) {
     this.setMetrics(options.metrics);
   }
@@ -14,8 +14,8 @@ Dashboard.defaults = {
   height: 35
 };
 
-Dashboard.prototype.setup = function() {
-  var step = +cubism.option("step", 1e4);
+Dashboard.prototype.setup = function(credentials) {
+  var step = +cubism.option("step", 3e5);
   var context = cubism.context()
       .step(step)
       .size(window.innerWidth - 4);
@@ -25,6 +25,9 @@ Dashboard.prototype.setup = function() {
   //});;
 
   this.cube = context.cube(this.host);
+  if (credentials) {
+    this.cube.credentials(credentials);
+  }
   this.horizon = context.horizon();
 
   // Add top and bottom axes to display the time.
@@ -62,7 +65,14 @@ Dashboard.prototype.fetchTotals = function() {
   var getTotal = function(index, expression, start, stop) {
     var format = d3.time.format.iso;
     var url = self.host+'/1.0/metric?expression='+expression+'&start='+format(start)+'&stop='+format(stop)+'&step=3600000&cachebuster='+ (+new Date());
-    d3.json(url, function(response) {
+    var xhr = d3.json(url);
+    if (self.options.credentials) {
+      xhr.header('Authorization', self.options.credentials);
+    }
+    xhr.get(function(error, response) {
+      if (error) {
+        throw new Error("unable to load data");
+      }
       var val = 0;
       for (var i = 0, c = response.length; i < c; i++) {
         var res = response[i];
