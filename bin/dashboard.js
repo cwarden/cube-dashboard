@@ -85,7 +85,8 @@ var checkSignedRequest = function(request, response, next) {
       }
     }
 
-    response.cookie('signed_request', signedRequest, { secure: true } );
+    var sslEnabled = request.headers['x-forwarded-for'] === 'https';
+    response.cookie('signed_request', signedRequest, { secure: sslEnabled });
     next();
   } catch(e) {
     response.locals.layout = false;
